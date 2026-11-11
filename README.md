@@ -53,6 +53,17 @@ The file explorer is an IDE-like tree of the repository you are working in. It s
 
 The sidebar section needs a Gentle Shell that supports extension sections, which means the `section: { order }` hook on branch `feat/sidebar-extension-sections`. Older versions ignore the section, but `/files` still works. shell-extras keeps its own choices (active tab, folded section) in `~/.gentle-shell/shell-extras/settings.json`; `SHELL_EXTRAS_HOME` moves that directory.
 
+## Git tab
+
+The **Git** tab shows:
+
+- the current branch, with commits ahead (`↑`) and behind (`↓`) its upstream;
+- how many files changed, or `clean`;
+- the branch's pull request, with its state;
+- the CI checks: passed `✓`, failed `✗` and pending `◌`.
+
+Click the PR row to open the pull request in the browser. The PR comes from `gh pr view`; without the GitHub CLI the row reads `gh unavailable`. Git refreshes every 5 seconds (`SHELL_EXTRAS_GIT_POLL_MS`) and after each agent turn, but only while the tab is on screen; `gh` is asked at most once a minute, or right away when the branch changes.
+
 ## Try it
 
 Run the fork's launcher with this package loaded for one session:

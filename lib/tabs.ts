@@ -19,6 +19,8 @@ export interface Tab {
 	label: string;
 	order: number;
 	widget: RailWidget;
+	/** Called when the user switches to this tab, so it can fetch fresh data. */
+	onShow?(): void;
 }
 
 export interface TabsSidebarState {
@@ -194,6 +196,7 @@ export function tabsHost(state: TabsSidebarState, options: TabsHostOptions): Tab
 			if (!tabs.some((tab) => tab.id === id) || active()?.id === id) return;
 			activeId = id;
 			settings.set("activeTab", id);
+			tabs.find((tab) => tab.id === id)?.onShow?.();
 			options.requestRender();
 		},
 		isActive: (id) => active()?.id === id,

@@ -2,7 +2,7 @@
 	"name": "shell-extras",
 	"version": "0.1.0",
 	"private": true,
-	"description": "Personal Gentle Shell extras: an IDE-like file explorer in the fullscreen sidebar.",
+	"description": "Personal Gentle Shell extras: a tabbed sidebar section with a file explorer, Git, project, system, Spotify and Engram widgets.",
 	"license": "MIT",
 	"type": "module",
 	"keywords": [
@@ -10,7 +10,8 @@
 	],
 	"pi": {
 		"extensions": [
-			"./extensions/file-explorer.ts"
+			"./extensions/file-explorer.ts",
+			"./extensions/git-tab.ts"
 		]
 	},
 	"scripts": {
