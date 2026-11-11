@@ -121,6 +121,8 @@ The login uses OAuth PKCE, so there is no client secret. It only asks for the sc
 
 ## Try it
 
+Check out the fork's `feat/sidebar-bottom-anchor` branch. It holds both hooks: extension sections, and the bottom anchor Ulisao uses. The sidebar needs fullscreen mode and a terminal at least 140 columns wide.
+
 Run the fork's launcher with this package loaded for one session:
 
 ```bash

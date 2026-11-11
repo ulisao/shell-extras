@@ -22,11 +22,11 @@ The widgets live in `shell-extras`, on branch `feat/sidebar-widgets`, which star
 - [x] T2 S3 — shell-extras: the tab container section (tab bar, click to switch, active tab persisted). The explorer moves into the "Files" tab. Route: inline. Commit: ec9194e
 - [x] T3 S4 — Git tab: branch, ahead/behind, PR and CI. Route: inline. Commit: b86228b
 - [x] T4 S4 — Project tab: scripts launcher, listening ports, Docker containers, ODD progress. Route: inline. Commit: ca1e7e7
-- [ ] T5 S4 — System tab: clock, pomodoro, CPU and RAM. Route: worker (context backstop). Commit: —
-- [ ] T6 S2 — Spotify tab: PKCE login command, token storage, now playing, controls. Risk: item 2 (credentials), so it gets its own commit and an independent verify. Route: worker (context backstop), then gentle-ai-verify. Commit: —
-- [ ] T7 S5 — Engram tab: last save time and a "recordar ahora" button. Route: worker (context backstop). Commit: —
-- [ ] T8 S1 — Ulisao animated ASCII icon pinned to the bottom (uses T1). Route: worker (context backstop). Commit: —
-- [ ] T9 S1-S5 — README and the user's live check. Route: inline plus the user. Commit: —
+- [x] T5 S4 — System tab: clock, pomodoro, CPU and RAM. Route: inline (the worker was unavailable). Commit: f272d65
+- [x] T6 S2 — Spotify tab: PKCE login command, token storage, now playing, controls. Risk: item 2 (credentials), so it gets its own commit and an independent verify. Route: inline plus gentle-ai-verify. Commit: f8c0893, fix 2701e1e
+- [x] T7 S5 — Engram tab: last save time and a "recordar ahora" button. Route: inline. Commit: e45182e
+- [x] T8 S1 — Ulisao animated ASCII icon pinned to the bottom (uses T1). Route: inline. Commit: eb1b8a8
+- [ ] T9 S1-S5 — README and the user's live check. Route: inline plus the user. Commit: README in each feature commit; Try it in the closing commit. Pending: the user's live check and the first `/spotify login`.
 
 ## Log
 
@@ -48,3 +48,15 @@ The widgets live in `shell-extras`, on branch `feat/sidebar-widgets`, which star
   - T2 and T3 RED were observed only as a missing module, because the tests were written first. The suite passes 67/67, and `tsc` is clean.
   - Design: a single "shell-extras.tabs" section (order 50) holds the tabs. Each tab is registered by `registerTabWidget` (`lib/widget-extension.ts`). State lives in `~/.gentle-shell/shell-extras/settings.json`.
 - L7 (evidence): T4 passes 76/76 and `tsc` is clean. The context backstop fired at about 150k tokens, so T5, T7 and T8 go to a worker, and T6 to a worker followed by verify.
+- L8 (evidence):
+  - The gentle-ai-worker failed with "Writer repository preparation was unavailable", because the session cwd `Repositorios` is not a Git repository. T5–T8 were done inline.
+  - T5 and T6 RED were not observed as failing assertions, because the implementation was written together with the tests.
+  - T7 used `tool_execution_end` (`event.toolName`, `event.isError`) and `pi.sendUserMessage(text, { deliverAs: "followUp" })`; `tsc` validated both.
+  - T8's RED was a missing module.
+  - The T6 verify passed S2 with findings:
+    - Medium: any refresh failure cleared the tokens.
+    - Low: a logout during a refresh was undone.
+    - Low: an invalid port hung the login.
+    - All three got RED tests (two failed, one hung) and were fixed in 2701e1e.
+    - Advisory, not changed: the `user-read-currently-playing` scope is redundant, and a 401 or 429 gets no backoff.
+  - The final suite passes 113/113, and `tsc` is clean. A real Spotify login is unverified because it needs the user's app client ID.
