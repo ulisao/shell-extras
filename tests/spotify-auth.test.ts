@@ -107,3 +107,52 @@ test("S2 a corrupt token file reads as logged out", async (t) => {
 	writeFileSync(file, "{nope");
 	assert.equal(await new TokenStore(file, "abc", fakeFetch([], []), () => 0).accessToken(), undefined);
 });
+
+test("S2 a transient refresh failure (network/5xx) keeps the tokens", async (t) => {
+	const file = join(dir(t), "spotify-token.json");
+	writeFileSync(file, JSON.stringify({ accessToken: "A", refreshToken: "R", expiresAt: 0 }));
+	const offline = (async () => {
+		throw new TypeError("fetch failed");
+	}) as unknown as typeof fetch;
+	for (const fetcher of [offline, fakeFetch([{ status: 503 }], [])]) {
+		const store = new TokenStore(file, "abc", fetcher, () => 10);
+		assert.equal(await store.accessToken(), undefined);
+		assert.equal(existsSync(file), true);
+		assert.equal(store.loggedIn(), true);
+	}
+});
+
+test("S2 logout during an in-flight refresh stays logged out", async (t) => {
+	const file = join(dir(t), "spotify-token.json");
+	writeFileSync(file, JSON.stringify({ accessToken: "A", refreshToken: "R", expiresAt: 0 }));
+	let release!: () => void;
+	const gate = new Promise<void>((resolve) => (release = resolve));
+	const fetcher = (async () => {
+		await gate;
+		return { ok: true, status: 200, json: async () => ({ access_token: "B", refresh_token: "R2", expires_in: 3600 }) };
+	}) as unknown as typeof fetch;
+	const store = new TokenStore(file, "abc", fetcher, () => 10);
+	const pending = store.accessToken();
+	store.clear();
+	release();
+	assert.equal(await pending, undefined);
+	assert.equal(existsSync(file), false);
+	assert.equal(store.loggedIn(), false);
+});
+
+test("S2 an invalid callback port rejects instead of hanging", async () => {
+	for (const port of [70000, 1.5, -1]) {
+		const pending = waitForCallback({ port, state: "s", timeoutMs: 200 });
+		await assert.rejects(pending.port, /port/);
+		await assert.rejects(pending.code, /port/);
+	}
+});
+
+test("S2 refresh is single in-flight", async (t) => {
+	const file = join(dir(t), "spotify-token.json");
+	writeFileSync(file, JSON.stringify({ accessToken: "A", refreshToken: "R", expiresAt: 0 }));
+	const calls: Array<{ url: string; init: any }> = [];
+	const store = new TokenStore(file, "abc", fakeFetch([{ status: 200, body: { access_token: "B", expires_in: 3600 } }], calls), () => 10);
+	assert.deepEqual(await Promise.all([store.accessToken(), store.accessToken(), store.accessToken()]), ["B", "B", "B"]);
+	assert.equal(calls.length, 1);
+});

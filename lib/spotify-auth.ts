@@ -52,6 +52,12 @@ const PAGE = (message: string) => `<!doctype html><meta charset="utf-8"><title>s
  * closes after the first valid answer, an authorization error, or the timeout.
  */
 export function waitForCallback(options: { port: number; state: string; timeoutMs: number }): { port: Promise<number>; code: Promise<string> } {
+	if (!Number.isInteger(options.port) || options.port < 0 || options.port > 65535) {
+		const error = new Error(`Invalid Spotify callback port: ${options.port}`);
+		const rejected = Promise.reject(error);
+		rejected.catch(() => undefined);
+		return { port: rejected, code: rejected };
+	}
 	let resolvePort!: (port: number) => void;
 	let rejectPort!: (error: Error) => void;
 	const port = new Promise<number>((resolve, reject) => {
@@ -100,7 +106,7 @@ type Fetch = typeof fetch;
 
 async function tokenRequest(body: Record<string, string>, fetcher: Fetch, now: () => number, previousRefresh?: string): Promise<Tokens> {
 	const response = await fetcher(TOKEN, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(body).toString() });
-	if (!response.ok) throw new Error(`Spotify token request failed (${response.status})`);
+	if (!response.ok) throw Object.assign(new Error(`Spotify token request failed (${response.status})`), { status: response.status });
 	const data = (await response.json()) as { access_token?: string; refresh_token?: string; expires_in?: number };
 	if (!data.access_token) throw new Error("Spotify token response had no access token");
 	const refreshToken = data.refresh_token ?? previousRefresh;
@@ -120,6 +126,8 @@ export function exchangeCode(options: { clientId: string; code: string; verifier
 export class TokenStore {
 	private tokens: Tokens | undefined;
 	private refreshing: Promise<string | undefined> | undefined;
+	/** Bumped by clear(), so a refresh that started before a logout never writes the tokens back. */
+	private generation = 0;
 	readonly file: string;
 	private readonly clientId: string;
 	private readonly fetcher: Fetch;
@@ -154,6 +162,7 @@ export class TokenStore {
 	}
 
 	clear(): void {
+		this.generation++;
 		this.tokens = undefined;
 		rmSync(this.file, { force: true });
 	}
@@ -162,13 +171,18 @@ export class TokenStore {
 		const tokens = this.tokens;
 		if (!tokens) return undefined;
 		if (this.now() < tokens.expiresAt - EARLY_MS) return tokens.accessToken;
+		const generation = this.generation;
 		this.refreshing ??= tokenRequest({ grant_type: "refresh_token", refresh_token: tokens.refreshToken, client_id: this.clientId }, this.fetcher, this.now, tokens.refreshToken)
 			.then((fresh) => {
+				if (generation !== this.generation) return undefined;
 				this.save(fresh);
 				return fresh.accessToken;
 			})
-			.catch(() => {
-				this.clear();
+			.catch((error: { status?: number }) => {
+				// Spotify rejected the refresh token (4xx): log out. A network error or a
+				// 5xx is transient: keep the tokens and try again on the next poll.
+				const status = error?.status;
+				if (generation === this.generation && typeof status === "number" && status >= 400 && status < 500) this.clear();
 				return undefined;
 			})
 			.finally(() => {

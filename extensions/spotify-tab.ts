@@ -60,6 +60,10 @@ export default function spotifyTab(pi: ExtensionAPI): void {
 		}
 		settings.set("spotifyClientId", id);
 		const port = numberFromEnv("SHELL_EXTRAS_SPOTIFY_PORT", 8888);
+		if (!Number.isInteger(port) || port < 1 || port > 65535) {
+			ctx.ui.notify(`SHELL_EXTRAS_SPOTIFY_PORT must be a port between 1 and 65535, not ${port}`, "error");
+			return;
+		}
 		const redirectUri = `http://127.0.0.1:${port}/callback`;
 		const verifier = randomVerifier();
 		const state = randomState();
