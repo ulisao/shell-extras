@@ -93,6 +93,32 @@ Ulisao, the estudiobaretta.com.ar bot, floats at the bottom of the fullscreen ra
 - `SHELL_EXTRAS_ULISAO=0` hides it.
 - `SHELL_EXTRAS_ULISAO_MS` sets the frame time (default 400 ms).
 
+## Spotify tab
+
+The **Music** tab shows the track that is playing, its artists, the device and the progress. Click its controls:
+
+- `⏮` `⏯` `⏭` go back, play or pause, and skip;
+- `🔀` toggles shuffle;
+- `🔁` cycles repeat: off, then the playlist, then the track;
+- `[-]` / `[+]` change the volume by 10%.
+
+Controlling playback needs Spotify Premium.
+
+To connect it once:
+
+1. At <https://developer.spotify.com/dashboard>, create an app and select **Web API**.
+2. Add the redirect URI `http://127.0.0.1:8888/callback`.
+3. Copy the app's **Client ID**.
+4. In Gentle Shell, run `/spotify login <client-id>`. The browser opens Spotify's consent page; accept it.
+
+The login uses OAuth PKCE, so there is no client secret. It only asks for the scopes `user-read-playback-state`, `user-modify-playback-state` and `user-read-currently-playing`.
+
+- The token is saved in `~/.gentle-shell/shell-extras/spotify-token.json`, which is owner-only where the OS supports it, and is refreshed automatically.
+- `/spotify logout` deletes the token. `/spotify status` tells whether Spotify is connected.
+- `SPOTIFY_CLIENT_ID` can supply the client ID instead.
+- `SHELL_EXTRAS_SPOTIFY_PORT` changes the callback port; change the redirect URI in the app to match.
+- The player refreshes every 3 seconds (`SHELL_EXTRAS_SPOTIFY_POLL_MS`) while the tab is on screen.
+
 ## Try it
 
 Run the fork's launcher with this package loaded for one session:

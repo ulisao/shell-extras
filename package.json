@@ -15,7 +15,8 @@
 			"./extensions/project-tab.ts",
 			"./extensions/system-tab.ts",
 			"./extensions/engram-tab.ts",
-			"./extensions/ulisao.ts"
+			"./extensions/ulisao.ts",
+			"./extensions/spotify-tab.ts"
 		]
 	},
 	"scripts": {
