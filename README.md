@@ -64,6 +64,17 @@ The **Git** tab shows:
 
 Click the PR row to open the pull request in the browser. The PR comes from `gh pr view`; without the GitHub CLI the row reads `gh unavailable`. Git refreshes every 5 seconds (`SHELL_EXTRAS_GIT_POLL_MS`) and after each agent turn, but only while the tab is on screen; `gh` is asked at most once a minute, or right away when the branch changes.
 
+## Project tab
+
+The **Proj** tab shows:
+
+- the newest ODD feature in `odd/tasks/*.md`, with its checked tasks (`3/9`) and a progress bar;
+- the `package.json` scripts. Click one to run it with the project's package manager (from the lock file) in a new Windows Terminal tab, or in a new console window when `wt.exe` is missing;
+- the listening dev servers (node, bun, deno, python and similar). Click one to open `http://localhost:<port>`;
+- the running Docker containers, or `docker not running`.
+
+It refreshes every 10 seconds (`SHELL_EXTRAS_PROJECT_POLL_MS`) while the tab is on screen. Ports are read with `netstat` and `tasklist`, so they show on Windows only.
+
 ## Try it
 
 Run the fork's launcher with this package loaded for one session:

@@ -11,7 +11,8 @@
 	"pi": {
 		"extensions": [
 			"./extensions/file-explorer.ts",
-			"./extensions/git-tab.ts"
+			"./extensions/git-tab.ts",
+			"./extensions/project-tab.ts"
 		]
 	},
 	"scripts": {
