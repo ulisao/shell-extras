@@ -16,9 +16,9 @@ The only change to the `gentle-shell` fork is a small generic hook on branch `fe
 ## Tasks
 
 - [ ] T1 S1 — gentle-shell fork: opt-in extension sections in the rail and the panel sheet, plus tests and docs. Route: inline. Commit: —
-- [ ] T2 S2-S4 — shell-extras scaffold, and a pure tree and Git status model (porcelain v1 with ignored files, folder aggregation) with tests. Route: inline. Commit: —
-- [ ] T3 S2-S5,S7 — rail section: tree rendering, Nerd Font icons, status colors, click to collapse, bounded viewport with the wheel, registration, and refresh. Route: inline. Commit: —
-- [ ] T4 S6 — preview overlay, plus a keyboard explorer command with Enter → preview. Route: inline. Commit: —
+- [x] T2 S2-S4 — shell-extras scaffold, and a pure tree and Git status model (porcelain v1 with ignored files, folder aggregation) with tests. Route: inline. Commit: b1b7a8c
+- [ ] T3 S2-S5,S7 — rail section: tree rendering, Nerd Font icons, status colors, click to collapse, bounded viewport with the wheel, registration, and refresh. The pure view (`lib/explorer-view.ts`, `lib/icons.ts`, tests) was done inline; the extension glue (`lib/explorer-model.ts`, `lib/explorer-rail.ts`) is delegated to a worker (context backstop). Commit: a729354
+- [ ] T4 S6 — preview overlay, plus a keyboard explorer command with Enter → preview. `lib/preview.ts` was written inline; the overlay and command are delegated with T3. Commit: d788ddd (1146 lines, about 680 of them tests)
 - [ ] T5 S1-S7 — install the fork and the package locally, verify manually in Gentle Shell, write the README. Route: inline plus the user's manual check. Commit: —
 
 ## Log
@@ -35,3 +35,7 @@ The only change to the `gentle-shell` fork is a small generic hook on branch `fe
   - Built-in orders are todo 100, jobs 200, agents 300, footer 400.
   - The explorer defaults to order 50 (top of the rail, "como principal"), and it is configurable.
   - The package does not import gentle-pi internals. It talks to the hook only through the shared state contract.
+- L5 (evidence):
+  - T1 RED was observed: three tests failed before the hook existed.
+  - T2 and the T3 view modules were written before their tests ran, so no RED was observed for them. Their tests pass: 8/8, and `tsc` is clean.
+  - gentle-shell `pnpm install` failed in a postinstall step that builds a Go binary (`cannot install cross-compiled binaries when GOBIN is set`). The JavaScript dependencies were installed and the tests run.
