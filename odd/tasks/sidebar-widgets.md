@@ -70,3 +70,8 @@ The widgets live in `shell-extras`, on branch `feat/sidebar-widgets`, which star
 - L11 (evidence):
   - The video shows the site widget: a rotating sphere of dots with a violet core and a pink/cyan/green iridescent rim. Ulisao was redrawn as a rotating Braille point sphere with 24-bit color, 60 frames at 120 ms.
   - Mem click could not be reproduced. A real engram-tab plus git-tab mount, clicked on "Mem" in the tab bar, switches to the Engram body. A gentle-shell rail harness (neon and float, transparent and tinted) also switches on tab-bar clicks.
+- L12 (user): "nono, pero si quisiera mandar a mi github todo esto, asi desps lo instalo en otras maquinas" / "agregame una mini guia de instalacion".
+  - User answers: the shell-extras repo is public; the fork is a public GitHub fork; add the patch script.
+  - Published at https://github.com/ulisao/shell-extras: `main` = `feat/sidebar-widgets`, which includes the install guide and `scripts/patch-claude-version.mjs` (f8d57f8).
+  - The fork is https://github.com/ulisao/gentle-shell, branch `feat/sidebar-bottom-anchor`, which is also set as the default branch.
+  - Local setup: the `gsx` launcher and the settings.json package entry.
