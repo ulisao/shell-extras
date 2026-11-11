@@ -3,8 +3,11 @@ import { ExplorerModel } from "../lib/explorer-model.ts";
 import { ExplorerOverlay } from "../lib/explorer-overlay.ts";
 import { createRailPart, type SidebarState } from "../lib/explorer-rail.ts";
 import type { TreeRow } from "../lib/file-tree.ts";
+import { Settings } from "../lib/settings.ts";
+import { tabsHost, type TabsHost } from "../lib/tabs.ts";
 
 const PART_KEY = "shell-extras.files";
+const TAB_ID = "files";
 const SIDEBAR_STATE = Symbol.for("gentle-pi.experimental-sidebar.state");
 const OVERLAY_OPTIONS = { width: "100%", maxHeight: "100%", margin: 0, anchor: "center" } as const;
 
@@ -24,6 +27,7 @@ export default function fileExplorer(pi: ExtensionAPI): void {
 	let current: ExtensionContext | undefined;
 	let model: ExplorerModel | undefined;
 	let sidebar: SidebarState | undefined;
+	let tabs: TabsHost | undefined;
 	let timer: ReturnType<typeof setInterval> | undefined;
 	let overlayOpen = false;
 
@@ -32,7 +36,7 @@ export default function fileExplorer(pi: ExtensionAPI): void {
 		timer = undefined;
 	};
 
-	const railVisible = () => Boolean(sidebar?.active && sidebar.ownsHost?.());
+	const railVisible = () => Boolean(sidebar?.active && sidebar.ownsHost?.() && tabs?.isActive(TAB_ID) && tabs.expanded());
 
 	const startPolling = () => {
 		const interval = numberFromEnv("SHELL_EXTRAS_FILES_POLL_MS", 3000);
@@ -79,6 +83,7 @@ export default function fileExplorer(pi: ExtensionAPI): void {
 				const terminal = (tui as { terminal?: { rows: number } }).terminal;
 				let rail: ReturnType<typeof createRailPart> | undefined;
 				let state: SidebarState | undefined;
+				let host: TabsHost | undefined;
 				if (terminal) {
 					const holder = terminal as unknown as Record<symbol, SidebarState | undefined>;
 					state = holder[SIDEBAR_STATE] ??= { active: false, parts: new Map() };
@@ -88,12 +93,14 @@ export default function fileExplorer(pi: ExtensionAPI): void {
 						state,
 						rows: () => terminal.rows,
 						requestRender: () => tui.requestRender(),
-						order: numberFromEnv("SHELL_EXTRAS_FILES_ORDER", 50),
+						order: 0,
 						openPreview: (row) => {
 							if (current) void openOverlay(current, row);
 						},
 					});
-					state.parts.set(PART_KEY, rail);
+					host = tabsHost(state, { theme, requestRender: () => tui.requestRender(), settings: new Settings(), order: numberFromEnv("SHELL_EXTRAS_ORDER", 50) });
+					tabs = host;
+					host.add({ id: TAB_ID, label: "Files", order: 10, widget: rail });
 					sidebar = state;
 				}
 				return {
@@ -101,8 +108,11 @@ export default function fileExplorer(pi: ExtensionAPI): void {
 					invalidate() {},
 					dispose() {
 						rail?.dispose();
-						if (state && state.parts.get(PART_KEY) === rail) state.parts.delete(PART_KEY);
-						if (sidebar === state) sidebar = undefined;
+						if (rail) host?.remove(TAB_ID, rail);
+						if (sidebar === state) {
+							sidebar = undefined;
+							tabs = undefined;
+						}
 					},
 				};
 			},

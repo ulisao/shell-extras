@@ -10,6 +10,8 @@ import fileExplorer from "../extensions/file-explorer.ts";
 
 const SIDEBAR = Symbol.for("gentle-pi.experimental-sidebar.state");
 const KEY = "shell-extras.files";
+const TABS = "shell-extras.tabs";
+const HOST = Symbol.for("shell-extras.tabs.host");
 const theme = {
 	fg: (_role: string, text: string) => text,
 	bold: (text: string) => text,
@@ -57,11 +59,13 @@ interface Fixture {
 	renders: Array<boolean | undefined>;
 	tui: any;
 	fire(event: string): Promise<void>;
-	mount(tui?: any): { bottom: any; part: any; state: any };
+	mount(tui?: any): { bottom: any; part: any; tabs: any; state: any };
 }
 
 function fixture(t: TestContext, options: { mode?: string; extra?: number; env?: Record<string, string> } = {}): Fixture {
-	const env = { SHELL_EXTRAS_FILES_POLL_MS: "0", ...(options.env ?? {}) };
+	const home = mkdtempSync(join(tmpdir(), "shell-extras-home-"));
+	t.after(() => rm(home, { recursive: true, force: true }));
+	const env = { SHELL_EXTRAS_FILES_POLL_MS: "0", SHELL_EXTRAS_HOME: home, ...(options.env ?? {}) };
 	Object.assign(process.env, env);
 	t.after(() => {
 		for (const name of Object.keys(env)) delete process.env[name];
@@ -111,7 +115,7 @@ function fixture(t: TestContext, options: { mode?: string; extra?: number; env?:
 		mount: (mountTui = tui) => {
 			const bottom = (widgets.get(KEY)!.factory as any)(mountTui, theme);
 			const state = mountTui.terminal?.[SIDEBAR];
-			return { bottom, part: state?.parts.get(KEY), state };
+			return { bottom, part: state?.[HOST]?.widget("files"), tabs: state?.parts.get(TABS), state };
 		},
 	};
 	t.after(async () => {
@@ -134,29 +138,31 @@ test("S7 the package registers /files and, outside the TUI, adds no widget", asy
 	assert.equal(view.widgets.size, 0);
 });
 
-test("S7 in the TUI a below-editor widget registers the rail part with the section hook contract", async (t) => {
-	const view = fixture(t, { env: { SHELL_EXTRAS_FILES_ORDER: "70" } });
+test("S7 S3 in the TUI a below-editor widget adds the Files tab to the EXTRAS rail section", async (t) => {
+	const view = fixture(t, { env: { SHELL_EXTRAS_ORDER: "70" } });
 	await view.fire("session_start");
 	assert.deepEqual(view.widgets.get(KEY)?.options, { placement: "belowEditor" });
-	const { bottom, part, state } = view.mount();
+	const { bottom, part, tabs, state } = view.mount();
 	assert.deepEqual(bottom.render(80), [], "the bottom widget draws nothing");
 	assert.equal(typeof bottom.dispose, "function");
-	assert.deepEqual(part.section, { order: 70 });
-	assert.equal(part.surface, "panel");
-	for (const method of ["digest", "render", "invalidate", "handleMouse"]) assert.equal(typeof part[method], "function", method);
+	assert.deepEqual(tabs.section, { order: 70 });
+	assert.equal(tabs.surface, "panel");
+	for (const method of ["digest", "render", "invalidate", "handleMouse"]) assert.equal(typeof tabs[method], "function", method);
+	for (const method of ["digest", "render", "handleMouse"]) assert.equal(typeof part[method], "function", method);
+	assert.equal(state.parts.has(KEY), false, "the explorer is a tab, not its own section");
 	assert.equal(state.active, false, "a freshly created shared state is inactive");
 	assert.ok(state.parts instanceof Map);
 });
 
-test("S7 the order defaults to 50, and an existing shared state is reused", async (t) => {
+test("S7 the section order defaults to 50, and an existing shared state is reused", async (t) => {
 	const view = fixture(t);
 	await view.fire("session_start");
 	const existing = { active: true, parts: new Map([["other", { id: 1 }]]) };
 	(view.tui.terminal as any)[SIDEBAR] = existing;
-	const { part, state } = view.mount();
+	const { tabs, state } = view.mount();
 	assert.equal(state, existing);
-	assert.deepEqual(part.section, { order: 50 });
-	assert.deepEqual([...existing.parts.keys()], ["other", KEY]);
+	assert.deepEqual(tabs.section, { order: 50 });
+	assert.deepEqual([...existing.parts.keys()], ["other", TABS]);
 });
 
 test("S7 a TUI without a terminal gets the widget but no rail part", async (t) => {
@@ -167,17 +173,28 @@ test("S7 a TUI without a terminal gets the widget but no rail part", async (t) =
 	bottom.dispose();
 });
 
-test("S7 dispose removes only the part this widget registered", async (t) => {
+test("S7 dispose removes only the section this widget registered", async (t) => {
 	const view = fixture(t);
 	await view.fire("session_start");
 	const first = view.mount();
 	first.bottom.dispose();
-	assert.equal(first.state.parts.has(KEY), false, "its own part is removed");
+	assert.equal(first.state.parts.has(TABS), false, "the section goes with its last tab");
 	const second = view.mount();
 	const replacement = { replaced: true };
-	second.state.parts.set(KEY, replacement);
+	second.state.parts.set(TABS, replacement);
 	second.bottom.dispose();
-	assert.equal(second.state.parts.get(KEY), replacement, "a part registered by someone else stays");
+	assert.equal(second.state.parts.get(TABS), replacement, "a part registered by someone else stays");
+});
+
+test("S3 the EXTRAS section shows the tab bar above the file tree", async (t) => {
+	const view = fixture(t);
+	await view.fire("session_start");
+	const { tabs } = view.mount();
+	await until(() => lines(tabs).some((line) => line.includes("new.ts")), "the first refresh");
+	const out = lines(tabs);
+	assert.match(out[0]!, /^▾ EXTRAS/);
+	assert.equal(out[1]!.trim(), "[ Files ]");
+	assert.match(out[2]!, /^▾ FILES/);
 });
 
 test("S2-S4 the rail part renders the tree of the repository with its Git status", async (t) => {
@@ -234,7 +251,7 @@ test("the digest covers version, collapsed, scrollTop, hover, header hover and v
 	const before = part.digest();
 	part.handleMouse(mouse({ type: "click", y: folder }));
 	assert.notEqual(part.digest(), before, "the model version changes the digest");
-	assert.equal(state.parts.get(KEY), part);
+	assert.equal(state[HOST].widget("files"), part);
 });
 
 test("S2 a left click on the header collapses and expands the section, other buttons do nothing", async (t) => {

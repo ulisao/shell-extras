@@ -4,7 +4,7 @@ These are personal extras for [Gentle Shell](https://github.com/Gentleman-Progra
 
 ## File explorer
 
-The file explorer is an IDE-like tree of the repository you are working in. It shows up as a **FILES** section in the fullscreen sidebar.
+The file explorer is an IDE-like tree of the repository you are working in. It shows up in the **Files** tab of the **EXTRAS** section of the fullscreen sidebar. EXTRAS has a tab bar on top: click a tab to see only its widgets; the chosen tab is remembered. Click the EXTRAS header to fold the whole section.
 
 - **Tree:** the tree starts at the Git root of the session's cwd, or at the cwd itself outside Git. Folders come first, and `.git` is hidden.
 - **Git status colors and badges:**
@@ -46,12 +46,12 @@ The file explorer is an IDE-like tree of the repository you are working in. It s
 
 | Variable | Default | Effect |
 |---|---|---|
-| `SHELL_EXTRAS_FILES_ORDER` | `50` | Position among the sidebar sections. The built-in sections are `todo` 100, `jobs` 200, `agents` 300 and Status 400. |
+| `SHELL_EXTRAS_ORDER` | `50` | Position of the EXTRAS section among the sidebar sections. The built-in sections are `todo` 100, `jobs` 200, `agents` 300 and Status 400. |
 | `SHELL_EXTRAS_FILES_POLL_MS` | `3000` | Polling interval. `0` turns polling off. |
 
 ### Requirements
 
-The sidebar section needs a Gentle Shell that supports extension sections, which means the `section: { order }` hook on branch `feat/sidebar-extension-sections`. Older versions ignore the section, but `/files` still works.
+The sidebar section needs a Gentle Shell that supports extension sections, which means the `section: { order }` hook on branch `feat/sidebar-extension-sections`. Older versions ignore the section, but `/files` still works. shell-extras keeps its own choices (active tab, folded section) in `~/.gentle-shell/shell-extras/settings.json`; `SHELL_EXTRAS_HOME` moves that directory.
 
 ## Try it
 
