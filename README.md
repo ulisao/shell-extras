@@ -2,6 +2,71 @@
 
 These are personal extras for [Gentle Shell](https://github.com/Gentleman-Programming/gentle-shell), packaged as a Pi package.
 
+It adds a tabbed **EXTRAS** section to the fullscreen sidebar with these tabs:
+
+- **Files**
+- **Git**
+- **Proj**
+- **Sys**
+- **Music** (Spotify)
+- **Mem** (Engram)
+
+It also adds Ulisao, a floating bot at the bottom of the sidebar.
+
+## Install on a new machine
+
+You need Gentle Shell installed, plus Git, Node.js 24, pnpm and the GitHub CLI (`gh`). The commands are for PowerShell on Windows.
+
+The sidebar needs the forked Gentle Shell from `ulisao/gentle-shell`, because it carries the hooks for extension sections and for the bottom anchor. The official one only gets `/files` and `/spotify`.
+
+1. **Clone both repositories next to each other**:
+
+   ```powershell
+   mkdir $HOME\Desktop\Repositorios; cd $HOME\Desktop\Repositorios
+   git clone -b feat/sidebar-bottom-anchor https://github.com/ulisao/gentle-shell.git
+   git clone https://github.com/ulisao/shell-extras.git
+   ```
+
+2. **Install the dependencies**:
+
+   ```powershell
+   cd gentle-shell; pnpm install; cd ..
+   cd shell-extras; npm install; cd ..
+   ```
+
+   In the fork, `pnpm install` can fail at the end while it builds a Go binary (`GOBIN is set`). The JavaScript dependencies are still installed, and that is enough.
+
+3. **Load shell-extras on every launch**:
+
+   ```powershell
+   gentle-shell install $HOME\Desktop\Repositorios\shell-extras
+   ```
+
+   This adds the folder to `packages` in `~/.gentle-shell/agent/settings.json`. Local packages load in place, so a `git pull` is all an update needs.
+
+4. **Add a `gsx` command that opens the fork**:
+
+   ```powershell
+   mkdir -Force $HOME\bin
+   Set-Content $HOME\bin\gsx.cmd "@echo off`r`nnode `"$HOME\Desktop\Repositorios\gentle-shell\bin\gentle-shell.mjs`" %*"
+   ```
+
+   `$HOME\bin` must be on your `PATH`.
+
+5. **Patch the Claude Code version (optional)**. Do this if a newer model such as `claude-fable-5-2` fails with `claude_code_version_too_old`:
+
+   ```powershell
+   node shell-extras\scripts\patch-claude-version.mjs
+   ```
+
+   The script finds the active Gentle Shell install and the sibling `gentle-shell` fork. It raises the pinned version to the one `claude --version` reports, or to `--version X.Y.Z`. Each changed file keeps a `.bak-<old>` copy. `--dry-run` only lists what it would change.
+
+   Run it again after updating Gentle Shell, or after `pnpm install` in the fork.
+
+6. **Open it**: run `gsx` in a terminal at least 140 columns wide.
+
+   To connect Spotify, follow the Spotify tab section below.
+
 ## File explorer
 
 The file explorer is an IDE-like tree of the repository you are working in. It shows up in the **Files** tab of the **EXTRAS** section of the fullscreen sidebar. EXTRAS has a tab bar on top: click a tab to see only its widgets; the chosen tab is remembered. Click the EXTRAS header to fold the whole section.
