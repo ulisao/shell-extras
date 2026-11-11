@@ -13,7 +13,8 @@
 			"./extensions/file-explorer.ts",
 			"./extensions/git-tab.ts",
 			"./extensions/project-tab.ts",
-			"./extensions/system-tab.ts"
+			"./extensions/system-tab.ts",
+			"./extensions/engram-tab.ts"
 		]
 	},
 	"scripts": {

@@ -79,6 +79,12 @@ It refreshes every 10 seconds (`SHELL_EXTRAS_PROJECT_POLL_MS`) while the tab is 
 
 The **Sys** tab shows the clock and date, CPU and RAM use with small bars, and a pomodoro: 25 minutes of focus, then a 5 minute break. Click `▶ start` / `⏸ pause` and `↺ reset`. When a phase ends, Gentle Shell shows a notice, even if another tab is open. CPU and RAM refresh every 2 seconds (`SHELL_EXTRAS_SYSTEM_POLL_MS`) while the tab is on screen.
 
+## Engram tab
+
+The **Mem** tab shows when Engram last saved something: the last successful `mem_save`, `mem_update`, `mem_session_summary` or `mem_capture_passive` call. The time is kept in the shell-extras settings, so it survives restarts.
+
+Click `⟳ recordar ahora` to ask the agent to save a session summary right away. If the agent is busy, the request is queued as a follow-up. The button reads `✓ pedido enviado` for 10 seconds, and clicks during that time are ignored.
+
 ## Try it
 
 Run the fork's launcher with this package loaded for one session:
