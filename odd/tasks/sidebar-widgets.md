@@ -18,14 +18,14 @@ The widgets live in `shell-extras`, on branch `feat/sidebar-widgets`, which star
 
 ## Tasks
 
-- [ ] T1 S1 — gentle-shell fork: an opt-in `section.anchor: "bottom"` that pins a section to the bottom of the rail. Includes tests and docs. Route: inline. Commit: —
-- [ ] T2 S3 — shell-extras: the tab container section (tab bar, click to switch, active tab persisted). The explorer moves into the "Files" tab. Route: inline. Commit: —
-- [ ] T3 S4 — Git tab: branch, ahead/behind, PR and CI. Route: inline. Commit: —
-- [ ] T4 S4 — Project tab: scripts launcher, listening ports, Docker containers, ODD progress. Route: inline. Commit: —
-- [ ] T5 S4 — System tab: clock, pomodoro, CPU and RAM. Route: inline. Commit: —
-- [ ] T6 S2 — Spotify tab: PKCE login command, token storage, now playing, controls. Risk: item 2 (credentials), so it gets its own commit and an independent verify. Route: inline. Commit: —
-- [ ] T7 S5 — Engram tab: last save time and a "recordar ahora" button. Route: inline. Commit: —
-- [ ] T8 S1 — Ulisao animated ASCII icon pinned to the bottom (uses T1). Route: inline. Commit: —
+- [x] T1 S1 — gentle-shell fork: an opt-in `section.anchor: "bottom"` that pins a section to the bottom of the rail. Includes tests and docs. Route: inline. Commit: gentle-shell 35ea7c0b0
+- [x] T2 S3 — shell-extras: the tab container section (tab bar, click to switch, active tab persisted). The explorer moves into the "Files" tab. Route: inline. Commit: ec9194e
+- [x] T3 S4 — Git tab: branch, ahead/behind, PR and CI. Route: inline. Commit: b86228b
+- [x] T4 S4 — Project tab: scripts launcher, listening ports, Docker containers, ODD progress. Route: inline. Commit: ca1e7e7
+- [ ] T5 S4 — System tab: clock, pomodoro, CPU and RAM. Route: worker (context backstop). Commit: —
+- [ ] T6 S2 — Spotify tab: PKCE login command, token storage, now playing, controls. Risk: item 2 (credentials), so it gets its own commit and an independent verify. Route: worker (context backstop), then gentle-ai-verify. Commit: —
+- [ ] T7 S5 — Engram tab: last save time and a "recordar ahora" button. Route: worker (context backstop). Commit: —
+- [ ] T8 S1 — Ulisao animated ASCII icon pinned to the bottom (uses T1). Route: worker (context backstop). Commit: —
 - [ ] T9 S1-S5 — README and the user's live check. Route: inline plus the user. Commit: —
 
 ## Log
@@ -43,3 +43,8 @@ The widgets live in `shell-extras`, on branch `feat/sidebar-widgets`, which star
   - The rail has no bottom anchoring. Sections are stacked in one ScrollView, and their height comes from their content (`gentle-shell/lib/shell-sidebar-layout.ts` ~300-345).
   - Parts register through `state.parts` with `section.order`. `render(width)` returns lines, and `handleMouse` gets part-local x/y.
   - `pi.sendUserMessage` needs `deliverAs` while the agent is streaming.
+- L6 (evidence):
+  - T1 RED was observed: three tests failed before the anchor existed. Afterwards `shell-sidebar-layout` and `shell-panel` pass 100/100.
+  - T2 and T3 RED were observed only as a missing module, because the tests were written first. The suite passes 67/67, and `tsc` is clean.
+  - Design: a single "shell-extras.tabs" section (order 50) holds the tabs. Each tab is registered by `registerTabWidget` (`lib/widget-extension.ts`). State lives in `~/.gentle-shell/shell-extras/settings.json`.
+- L7 (evidence): T4 passes 76/76 and `tsc` is clean. The context backstop fired at about 150k tokens, so T5, T7 and T8 go to a worker, and T6 to a worker followed by verify.
