@@ -75,6 +75,10 @@ The **Proj** tab shows:
 
 It refreshes every 10 seconds (`SHELL_EXTRAS_PROJECT_POLL_MS`) while the tab is on screen. Ports are read with `netstat` and `tasklist`, so they show on Windows only.
 
+## System tab
+
+The **Sys** tab shows the clock and date, CPU and RAM use with small bars, and a pomodoro: 25 minutes of focus, then a 5 minute break. Click `▶ start` / `⏸ pause` and `↺ reset`. When a phase ends, Gentle Shell shows a notice, even if another tab is open. CPU and RAM refresh every 2 seconds (`SHELL_EXTRAS_SYSTEM_POLL_MS`) while the tab is on screen.
+
 ## Try it
 
 Run the fork's launcher with this package loaded for one session:

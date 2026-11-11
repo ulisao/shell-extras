@@ -12,7 +12,8 @@
 		"extensions": [
 			"./extensions/file-explorer.ts",
 			"./extensions/git-tab.ts",
-			"./extensions/project-tab.ts"
+			"./extensions/project-tab.ts",
+			"./extensions/system-tab.ts"
 		]
 	},
 	"scripts": {
