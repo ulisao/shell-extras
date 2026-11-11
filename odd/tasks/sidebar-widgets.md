@@ -60,3 +60,9 @@ The widgets live in `shell-extras`, on branch `feat/sidebar-widgets`, which star
     - All three got RED tests (two failed, one hung) and were fixed in 2701e1e.
     - Advisory, not changed: the `user-read-currently-playing` scope is redundant, and a 401 or 429 gets no backoff.
   - The final suite passes 113/113, and `tsc` is clean. A real Spotify login is unverified because it needs the user's app client ID.
+- L9 (native review):
+  - Lineage review-ae8eb5d0908597cd covered the committed range eb1b8a8..dca6c43 (Spotify) with the risk, resilience and reliability lenses. It was approved, and its authority was burned on acknowledgement.
+  - Advisory follow-ups, none blocking:
+    - `lib/spotify-auth.ts:185`: a 429 on refresh is treated as a 4xx and logs the user out. R1-001, R3-refresh-429-logout and R4-001 all point here.
+    - `lib/spotify-widget.ts:223`: the refresh after a control erases the error.
+    - `lib/spotify-widget.ts:179`: no backoff on 401 or 429.
