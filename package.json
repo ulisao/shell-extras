@@ -14,7 +14,8 @@
 			"./extensions/git-tab.ts",
 			"./extensions/project-tab.ts",
 			"./extensions/system-tab.ts",
-			"./extensions/engram-tab.ts"
+			"./extensions/engram-tab.ts",
+			"./extensions/ulisao.ts"
 		]
 	},
 	"scripts": {
