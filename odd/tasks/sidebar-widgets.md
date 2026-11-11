@@ -66,3 +66,7 @@ The widgets live in `shell-extras`, on branch `feat/sidebar-widgets`, which star
     - `lib/spotify-auth.ts:185`: a 429 on refresh is treated as a 4xx and logs the user out. R1-001, R3-refresh-429-logout and R4-001 all point here.
     - `lib/spotify-widget.ts:223`: the refresh after a control erases the error.
     - `lib/spotify-widget.ts:179`: no backoff on 401 or 429.
+- L10 (user): "el dibujo aparece abajo, pero nada que ver a lo que te pedi, tiene que verse como esto "C:\Users\PC\Videos\Grabaciones de pantalla\Grabación de pantalla 2026-11-11 134514.mp4" y la pestaña de engram no es accesible, no puedo hacerle click". User answers: install opencv-python-headless to read the video; Mem tab "Aparece, pero el click no hace nada".
+- L11 (evidence):
+  - The video shows the site widget: a rotating sphere of dots with a violet core and a pink/cyan/green iridescent rim. Ulisao was redrawn as a rotating Braille point sphere with 24-bit color, 60 frames at 120 ms.
+  - Mem click could not be reproduced. A real engram-tab plus git-tab mount, clicked on "Mem" in the tab bar, switches to the Engram body. A gentle-shell rail harness (neon and float, transparent and tinted) also switches on tab-bar clicks.

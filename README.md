@@ -87,11 +87,11 @@ Click `⟳ recordar ahora` to ask the agent to save a session summary right away
 
 ## Ulisao
 
-Ulisao, the estudiobaretta.com.ar bot, floats at the bottom of the fullscreen rail as a round ASCII face. It bobs over its shadow, blinks and winks. It is pure decoration: it does not react to clicks, and it animates only while the rail is on screen.
+Ulisao, the estudiobaretta.com.ar bot, floats at the bottom of the fullscreen rail as on the site: a slowly turning sphere of dots, drawn in Braille with 24-bit color, with a dim violet core and a rim that shimmers from green through cyan to pink. It is pure decoration: it does not react to clicks, and it animates only while the rail is on screen.
 
 - It needs the gentle-shell `section.anchor: "bottom"` hook from branch `feat/sidebar-bottom-anchor`. Without the hook, it shows as the last rail section.
 - `SHELL_EXTRAS_ULISAO=0` hides it.
-- `SHELL_EXTRAS_ULISAO_MS` sets the frame time (default 400 ms).
+- `SHELL_EXTRAS_ULISAO_MS` sets the frame time (default 120 ms).
 
 ## Spotify tab
 

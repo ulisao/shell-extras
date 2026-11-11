@@ -9,23 +9,25 @@ const KEY = "shell-extras.ulisao";
 const theme = { fg: (_role: string, text: string) => text, bold: (text: string) => text };
 const strip = (line: string) => line.replace(/\x1b\[[0-9;]*m/g, "");
 
-test("S1 every frame is a round bot of the same height, right-aligned within the width", () => {
+test("S1 every frame is a dotted sphere of the same height, right-aligned within the width", () => {
 	const heights = new Set<number>();
 	for (let index = 0; index < ULISAO_FRAMES; index++) {
 		const lines = ulisaoFrame(index, theme, 30).map(strip);
 		heights.add(lines.length);
 		for (const line of lines) assert.equal(visibleWidth(line), 30);
-		assert.ok(lines.some((line) => /[╭(]/.test(line)), "it has a round outline");
-		assert.ok(lines.every((line) => line.slice(0, 15).trim() === ""), "right-aligned: the left half stays empty");
+		assert.ok(lines.join("").match(/[⠁-⣿]/g)!.length > 40, "it is drawn with Braille dots");
+		assert.ok(lines.every((line) => line.slice(0, 11).trim() === ""), "right-aligned: only the right 19 columns are drawn");
 		assert.notEqual(lines.at(-1)!.trim(), "", "the last row is never blank, so the host keeps the height");
 	}
 	assert.equal(heights.size, 1, "frames never change the rail height");
-	assert.ok(ULISAO_FRAMES >= 4);
+	assert.ok(ULISAO_FRAMES >= 24, "a smooth turn");
 });
 
-test("S1 the frames move: they are not all the same", () => {
+test("S1 the sphere turns: frames differ, and the rim is iridescent", () => {
 	const frames = new Set(Array.from({ length: ULISAO_FRAMES }, (_, index) => ulisaoFrame(index, theme, 30).join("\n")));
-	assert.ok(frames.size >= 3);
+	assert.ok(frames.size >= 24);
+	const colors = new Set(ulisaoFrame(0, theme, 30).join("").match(/\[38;2;[0-9;]+m/g));
+	assert.ok(colors.size >= 5, "several colors: a violet core and a shimmering rim");
 	assert.deepEqual(ulisaoFrame(ULISAO_FRAMES, theme, 30), ulisaoFrame(0, theme, 30), "the animation loops");
 });
 

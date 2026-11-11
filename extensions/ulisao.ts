@@ -42,7 +42,7 @@ export default function ulisao(pi: ExtensionAPI): void {
 						if (!state?.active) return;
 						frame = (frame + 1) % ULISAO_FRAMES;
 						tui.requestRender();
-					}, Math.max(5, numberFromEnv("SHELL_EXTRAS_ULISAO_MS", 400)));
+					}, Math.max(5, numberFromEnv("SHELL_EXTRAS_ULISAO_MS", 120)));
 					timer.unref?.();
 				}
 				return {
